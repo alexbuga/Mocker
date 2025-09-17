@@ -15,9 +15,11 @@ extension Mocker {
         case dataWriteError(String)
     }
     
+    static public let mockerLaunchArgument = "--use-mocker"
+    
     static private let mocksFilename = "mocks.json"
     
-    static public func loadMocksFromSharedFolder() throws -> [Mock]? {
+    static public func loadMocksFromSharedFolder() throws -> [Mock] {
         guard let path = ProcessInfo().environment["SIMULATOR_SHARED_RESOURCES_DIRECTORY"] else {
             throw MockerPersistanceError.pathNotFound
         }
@@ -65,5 +67,18 @@ extension Mocker {
         } catch {
             throw MockerPersistanceError.dataWriteError(error.localizedDescription)
         }
+    }
+    
+    static public func loadAndRegisterMocksIfFlagIsEnabled() throws {
+        
+        let args = CommandLine.arguments
+        guard let flag = args.first(where: { $0 == Self.mockerLaunchArgument }) else {
+            return
+        }
+                
+        let mocks = try Mocker.loadMocksFromSharedFolder()
+        Mocker.mode = .optin
+        Mocker.removeAll()
+        mocks.forEach { $0.register() }
     }
 }
