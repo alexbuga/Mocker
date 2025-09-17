@@ -75,7 +75,7 @@ public struct Mock: Equatable {
     public let fileExtensions: [String]?
 
     /// The data which will be returned as the response based on the HTTP Method.
-    private let data: [HTTPMethod: Data]
+    let data: [HTTPMethod: Data]
 
     /// Add a delay to a certain mock, which makes the response returned later.
     public var delay: DispatchTimeInterval?
@@ -106,7 +106,7 @@ public struct Mock: Equatable {
     /// Can only be set internally as it's used by the `expectationForCompletingMock(_:)` method.
     // var onCompletedExpectation: XCTestExpectation?
 
-    private init(url: URL? = nil, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], requestError: Error? = nil, additionalHeaders: [String: String] = [:], fileExtensions: [String]? = nil) {
+    init(url: URL? = nil, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], requestError: Error? = nil, additionalHeaders: [String: String] = [:], fileExtensions: [String]? = nil) {
         guard data.count > 0 else {
             preconditionFailure("At least one entry is required in the data dictionary")
         }
@@ -141,7 +141,7 @@ public struct Mock: Equatable {
     ///   - data: The data which will be returned as the response based on the HTTP Method.
     ///   - additionalHeaders: Additional headers to be added to the response.
     @available(*, deprecated, renamed: "init(contentType:statusCode:data:additionalHeaders:)")
-    public init(dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:]) {
+    init(dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:]) {
         self.init(
             url: nil,
             contentType: dataType,
