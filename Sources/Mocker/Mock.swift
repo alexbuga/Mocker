@@ -58,6 +58,9 @@ public struct Mock: Equatable {
         }
         return urlToMock ?? generatedURL
     }
+    
+    /// If present, the comparison will take these parameters into account when comparing the URLs
+    public var matchingQueryParameters: [String]?
 
     /// The URL to mock as set implicitely from the init.
     private let urlToMock: URL?
@@ -106,7 +109,7 @@ public struct Mock: Equatable {
     /// Can only be set internally as it's used by the `expectationForCompletingMock(_:)` method.
     // var onCompletedExpectation: XCTestExpectation?
 
-    init(url: URL? = nil, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], requestError: Error? = nil, additionalHeaders: [String: String] = [:], fileExtensions: [String]? = nil) {
+    init(url: URL? = nil, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], requestError: Error? = nil, additionalHeaders: [String: String] = [:], fileExtensions: [String]? = nil, matchingQueryParameters: [String]? = nil) {
         guard data.count > 0 else {
             preconditionFailure("At least one entry is required in the data dictionary")
         }
@@ -131,6 +134,7 @@ public struct Mock: Equatable {
         self.headers = headers
 
         self.fileExtensions = fileExtensions?.map({ $0.replacingOccurrences(of: ".", with: "") })
+        self.matchingQueryParameters = matchingQueryParameters
     }
 
     /// Creates a `Mock` for the given data type. The mock will be automatically matched based on a URL created from the given parameters.
@@ -141,14 +145,15 @@ public struct Mock: Equatable {
     ///   - data: The data which will be returned as the response based on the HTTP Method.
     ///   - additionalHeaders: Additional headers to be added to the response.
     @available(*, deprecated, renamed: "init(contentType:statusCode:data:additionalHeaders:)")
-    init(dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:]) {
+    init(dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], matchingQueryParameters: [String]? = nil) {
         self.init(
             url: nil,
             contentType: dataType,
             statusCode: statusCode,
             data: data,
             additionalHeaders: additionalHeaders,
-            fileExtensions: nil
+            fileExtensions: nil,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
     
@@ -159,14 +164,15 @@ public struct Mock: Equatable {
     ///   - statusCode: The HTTP status code to return with the response.
     ///   - data: The data which will be returned as the response based on the HTTP Method.
     ///   - additionalHeaders: Additional headers to be added to the response.
-    public init(contentType: DataType?, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:]) {
+    public init(contentType: DataType?, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], matchingQueryParameters: [String]? = nil) {
         self.init(
             url: nil,
             contentType: contentType,
             statusCode: statusCode,
             data: data,
             additionalHeaders: additionalHeaders,
-            fileExtensions: nil
+            fileExtensions: nil,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
 
@@ -182,7 +188,7 @@ public struct Mock: Equatable {
     ///   - additionalHeaders: Additional headers to be added to the response.
     ///   - requestError: If provided, the URLSession will report the passed error rather than returning data. Defaults to `nil`.
     @available(*, deprecated, renamed: "init(url:ignoreQuery:cacheStoragePolicy:contentType:statusCode:data:additionalHeaders:requestError:)")
-    public init(url: URL, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], requestError: Error? = nil) {
+    public init(url: URL, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], requestError: Error? = nil, matchingQueryParameters: [String]? = nil) {
         self.init(
             url: url,
             ignoreQuery: ignoreQuery,
@@ -192,7 +198,8 @@ public struct Mock: Equatable {
             data: data,
             requestError: requestError,
             additionalHeaders: additionalHeaders,
-            fileExtensions: nil
+            fileExtensions: nil,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
     
@@ -207,7 +214,7 @@ public struct Mock: Equatable {
     ///   - data: The data which will be returned as the response based on the HTTP Method.
     ///   - additionalHeaders: Additional headers to be added to the response.
     ///   - requestError: If provided, the URLSession will report the passed error rather than returning data. Defaults to `nil`.
-    public init(url: URL, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], requestError: Error? = nil) {
+    public init(url: URL, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], requestError: Error? = nil, matchingQueryParameters: [String]? = nil) {
         self.init(
             url: url,
             ignoreQuery: ignoreQuery,
@@ -217,7 +224,8 @@ public struct Mock: Equatable {
             data: data,
             requestError: requestError,
             additionalHeaders: additionalHeaders,
-            fileExtensions: nil
+            fileExtensions: nil,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
     
@@ -230,14 +238,15 @@ public struct Mock: Equatable {
     ///   - data: The data which will be returned as the response based on the HTTP Method.
     ///   - additionalHeaders: Additional headers to be added to the response.
     @available(*, deprecated, renamed: "init(fileExtensions:contentType:statusCode:data:additionalHeaders:)")
-    public init(fileExtensions: String..., dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:]) {
+    public init(fileExtensions: String..., dataType: DataType, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], matchingQueryParameters: [String]? = nil) {
         self.init(
             url: nil,
             contentType: dataType,
             statusCode: statusCode,
             data: data,
             additionalHeaders: additionalHeaders,
-            fileExtensions: fileExtensions
+            fileExtensions: fileExtensions,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
     
@@ -249,14 +258,15 @@ public struct Mock: Equatable {
     ///   - statusCode: The HTTP status code to return with the response.
     ///   - data: The data which will be returned as the response based on the HTTP Method.
     ///   - additionalHeaders: Additional headers to be added to the response.
-    public init(fileExtensions: String..., contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:]) {
+    public init(fileExtensions: String..., contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], additionalHeaders: [String: String] = [:], matchingQueryParameters: [String]? = nil) {
         self.init(
             url: nil,
             contentType: contentType,
             statusCode: statusCode,
             data: data,
             additionalHeaders: additionalHeaders,
-            fileExtensions: fileExtensions
+            fileExtensions: fileExtensions,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
     
@@ -271,7 +281,7 @@ public struct Mock: Equatable {
     ///   - data: The data which will be returned as the response. Defaults to an empty `Data` instance.
     ///   - additionalHeaders: Additional headers to be added to the response.
     ///   - requestError: If provided, the URLSession will report the passed error rather than returning data. Defaults to `nil`.
-    public init(request: URLRequest, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: Data = Data(), additionalHeaders: [String: String] = [:], requestError: Error? = nil) {
+    public init(request: URLRequest, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: Data = Data(), additionalHeaders: [String: String] = [:], requestError: Error? = nil, matchingQueryParameters: [String]? = nil) {
         guard let requestHTTPMethod = Mock.HTTPMethod(rawValue: request.httpMethod ?? "") else {
             preconditionFailure("Unexpected http method")
         }
@@ -285,7 +295,8 @@ public struct Mock: Equatable {
             data: [requestHTTPMethod: data],
             requestError: requestError,
             additionalHeaders: additionalHeaders,
-            fileExtensions: nil
+            fileExtensions: nil,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
 
@@ -306,11 +317,14 @@ public struct Mock: Equatable {
     /// Used to compare the Mock data with the given `URLRequest`.
     static func == (mock: Mock, request: URLRequest) -> Bool {
         guard let requestHTTPMethod = Mock.HTTPMethod(rawValue: request.httpMethod ?? "") else { return false }
-
+        
         if let fileExtensions = mock.fileExtensions {
             // If the mock contains a file extension, this should always be used to match for.
             guard let pathExtension = request.url?.pathExtension else { return false }
             return fileExtensions.contains(pathExtension)
+        } else if let matchingQueryParameters = mock.matchingQueryParameters, !matchingQueryParameters.isEmpty {
+            let queryParametersMatch = mock.url.compareTo(request.url, matchingQueryParameters: matchingQueryParameters)
+            return mock.url.host == request.url?.host && mock.url.pathComponents == request.url?.pathComponents && queryParametersMatch
         } else if mock.ignoreQuery {
             return mock.request.url!.baseString == request.url?.baseString && mock.data.keys.contains(requestHTTPMethod)
         }
@@ -328,5 +342,42 @@ public struct Mock: Equatable {
         }
 
         return lhs.request.url!.absoluteString == rhs.request.url!.absoluteString && lhsHTTPMethods == rhsHTTPMethods
+    }
+}
+
+private extension URL {
+    var queryParameters: [String: String] {
+        var params = [String: String]()
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+              let queryItems = components.queryItems else {
+            return params
+        }
+        for item in queryItems {
+            params[item.name] = item.value
+        }
+        return params
+    }
+    
+    func compareTo(_ url: URL?, matchingQueryParameters: [String]? = nil) -> Bool {
+        guard let url else {
+            return false
+        }
+        
+        guard let matchingQueryParameters, !matchingQueryParameters.isEmpty else {
+            return self.absoluteString == url.absoluteString
+        }
+        
+        let selfParams = self.queryParameters
+        let otherParams = url.queryParameters
+        
+        var comparisonValue = false
+        for key in matchingQueryParameters {
+            guard let firstValue = selfParams[key], let secondValue = otherParams[key] else {
+                comparisonValue = false
+                return comparisonValue
+            }
+            comparisonValue = firstValue == secondValue
+        }
+        return comparisonValue
     }
 }
