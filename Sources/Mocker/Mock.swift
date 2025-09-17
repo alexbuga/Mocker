@@ -9,7 +9,6 @@
 //  swiftlint:disable force_unwrapping
 
 import Foundation
-import XCTest
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -102,10 +101,10 @@ public struct Mock: Equatable {
     public var onRequestHandler: OnRequestHandler?
 
     /// Can only be set internally as it's used by the `expectationForRequestingMock(_:)` method.
-    var onRequestExpectation: XCTestExpectation?
+    // var onRequestExpectation: XCTestExpectation?
 
     /// Can only be set internally as it's used by the `expectationForCompletingMock(_:)` method.
-    var onCompletedExpectation: XCTestExpectation?
+    // var onCompletedExpectation: XCTestExpectation?
 
     private init(url: URL? = nil, ignoreQuery: Bool = false, cacheStoragePolicy: URLCache.StoragePolicy = .notAllowed, contentType: DataType? = nil, statusCode: Int, data: [HTTPMethod: Data], requestError: Error? = nil, additionalHeaders: [String: String] = [:], fileExtensions: [String]? = nil) {
         guard data.count > 0 else {
