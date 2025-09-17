@@ -18,6 +18,7 @@ extension Mock: Codable {
         case data
         case additionalHeaders
         case fileExtensions
+        case matchingQueryParameters
     }
     
     public func encode(to encoder: any Encoder) throws {
@@ -37,6 +38,7 @@ extension Mock: Codable {
         try container.encode(dataToEncode, forKey: .data)
         try container.encode(headers, forKey: .additionalHeaders)
         try container.encode(fileExtensions, forKey: .fileExtensions)
+        try container.encode(matchingQueryParameters, forKey: .matchingQueryParameters)
     }
     
     public init(from decoder: any Decoder) throws {
@@ -62,6 +64,7 @@ extension Mock: Codable {
         
         let additionalHeaders = try container.decode([String: String].self, forKey: .additionalHeaders)
         let fileExtensions = try container.decodeIfPresent([String].self, forKey: .fileExtensions)
+        let matchingQueryParameters = try container.decodeIfPresent([String].self, forKey: .matchingQueryParameters)
         
         
         self.init(
@@ -73,7 +76,8 @@ extension Mock: Codable {
             data: data,
             requestError: nil, // TODO: Need to find a way to encode/decode Error
             additionalHeaders: additionalHeaders,
-            fileExtensions: fileExtensions
+            fileExtensions: fileExtensions,
+            matchingQueryParameters: matchingQueryParameters
         )
     }
     
