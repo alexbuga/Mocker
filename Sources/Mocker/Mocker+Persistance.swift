@@ -72,7 +72,7 @@ extension Mocker {
     static public func loadAndRegisterMocksIfFlagIsEnabled() throws {
         
         let args = CommandLine.arguments
-        guard let flag = args.first(where: { $0 == Self.mockerLaunchArgument }) else {
+        guard let flag = args.first(where: { $0.contains(Self.mockerLaunchArgument) }) else {
             return
         }
                 
