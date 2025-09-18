@@ -71,8 +71,7 @@ extension Mocker {
     
     static public func loadAndRegisterMocksIfFlagIsEnabled() throws {
         
-        let args = CommandLine.arguments
-        guard let flag = args.first(where: { $0.contains(Self.mockerLaunchArgument) }) else {
+        guard Mocker.isMockerLaunchArgumentEnabled() else {
             return
         }
                 
@@ -80,5 +79,22 @@ extension Mocker {
         Mocker.mode = .optin
         Mocker.removeAll()
         mocks.forEach { $0.register() }
+    }
+    
+    static public func isMockerLaunchArgumentEnabled() -> Bool {
+        let args = CommandLine.arguments
+        guard let _ = args.first(where: { $0.contains(Self.mockerLaunchArgument) }) else {
+            return false
+        }
+        return true
+    }
+}
+
+public extension URLSessionConfiguration {
+    func addMockingSupportIfFlagIsEnabled() {
+        guard Mocker.isMockerLaunchArgumentEnabled() else {
+            return
+        }
+        self.protocolClasses?.insert(MockingURLProtocol.self, at: 0)
     }
 }
